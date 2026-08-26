@@ -104,18 +104,20 @@
             margin-top: 10px;
         }
         .error { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; }
-        .backend-info {
-            background: #fff3cd;
+        .info-box {
+            background: #e7f3ff;
             padding: 15px;
             border-radius: 8px;
             margin-top: 20px;
-            border-left: 4px solid #ffc107;
+            border-left: 4px solid #2196F3;
         }
-        .backend-info code {
-            background: #f8f9fa;
+        .info-box code {
+            background: #d4e4f7;
             padding: 2px 6px;
             border-radius: 4px;
         }
+        .status-online { color: green; font-weight: bold; }
+        .status-offline { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -155,17 +157,17 @@
 
         <div class="error" id="errorMsg"></div>
 
-        <div class="backend-info">
-            <strong>⚠️ Info:</strong> Backend processing membutuhkan server terpisah. 
-            <br>Koneksi ke: <code id="backendUrl">https://video-splitter-api.onrender.com</code>
+        <div class="info-box">
+            <strong>💡 Info:</strong> Proses video dilakukan di server backend.
+            <br>Status: <span id="serverStatus">🔍 Mengecek...</span>
+            <br><small style="color: #666;">Backend URL: <span id="backendUrl">https://autocut-backend.onrender.com</span></small>
         </div>
     </div>
 
     <script>
         // === KONFIGURASI ===
-        // Ganti dengan URL backend yang sebenarnya
-        const BACKEND_URL = 'https://video-splitter-api.onrender.com';
-        // Untuk development lokal: 'http://localhost:5000'
+        // Ganti dengan URL backend yang sudah dideploy
+        const BACKEND_URL = 'https://autocut-backend.onrender.com';
         
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
@@ -179,14 +181,32 @@
         const downloadBtn = document.getElementById('downloadBtn');
         const errorMsg = document.getElementById('errorMsg');
         const durasiInput = document.getElementById('durasi');
-        const backendUrlDisplay = document.getElementById('backendUrl');
+        const serverStatus = document.getElementById('serverStatus');
+        const backendUrl = document.getElementById('backendUrl');
 
-        // Tampilkan URL backend di UI
-        backendUrlDisplay.textContent = BACKEND_URL;
+        // Tampilkan URL backend
+        backendUrl.textContent = BACKEND_URL;
+
+        // Cek server
+        async function checkServer() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/health`);
+                if (response.ok) {
+                    serverStatus.innerHTML = '✅ Online';
+                    serverStatus.className = 'status-online';
+                } else {
+                    serverStatus.innerHTML = '⚠️ Offline';
+                    serverStatus.className = 'status-offline';
+                }
+            } catch {
+                serverStatus.innerHTML = '❌ Tidak terhubung';
+                serverStatus.className = 'status-offline';
+            }
+        }
+        checkServer();
 
         let selectedFile = null;
 
-        // Drag & Drop
         dropZone.addEventListener('click', () => fileInput.click());
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -231,7 +251,6 @@
 
                 if (!response.ok) throw new Error('Server error: ' + response.status);
 
-                // Simulasi progress
                 let progress = 0;
                 const interval = setInterval(() => {
                     progress += 2;
