@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎬 Auto Video Splitter</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -27,17 +23,8 @@
             width: 100%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 2em;
-        }
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-        }
+        h1 { text-align: center; color: #333; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
         .upload-area {
             border: 2px dashed #ddd;
             border-radius: 10px;
@@ -47,47 +34,20 @@
             transition: all 0.3s;
             background: #f8f9fa;
         }
-        .upload-area:hover {
-            border-color: #667eea;
-            background: #f0f0ff;
-        }
-        .upload-area.dragover {
-            border-color: #764ba2;
-            background: #f0f0ff;
-        }
-        .upload-area input[type="file"] {
-            display: none;
-        }
-        .upload-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-        .file-name {
-            margin-top: 10px;
-            color: #667eea;
-            font-weight: bold;
-        }
-        .form-group {
-            margin: 20px 0;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
+        .upload-area:hover { border-color: #667eea; background: #f0f0ff; }
+        .upload-area input[type="file"] { display: none; }
+        .upload-icon { font-size: 48px; margin-bottom: 10px; }
+        .file-name { margin-top: 10px; color: #667eea; font-weight: bold; }
+        .form-group { margin: 20px 0; }
+        .form-group label { display: block; font-weight: 600; color: #333; margin-bottom: 5px; }
         .form-group input {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s;
         }
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+        .form-group input:focus { outline: none; border-color: #667eea; }
         .btn {
             width: 100%;
             padding: 15px;
@@ -100,17 +60,9 @@
             cursor: pointer;
             transition: transform 0.2s;
         }
-        .btn:hover {
-            transform: scale(1.02);
-        }
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .progress-section {
-            display: none;
-            margin-top: 20px;
-        }
+        .btn:hover { transform: scale(1.02); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .progress-section { display: none; margin-top: 20px; }
         .progress-bar {
             width: 100%;
             height: 30px;
@@ -130,15 +82,8 @@
             color: white;
             font-weight: bold;
         }
-        .result-section {
-            display: none;
-            margin-top: 20px;
-        }
-        .episode-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin: 15px 0;
-        }
+        .result-section { display: none; margin-top: 20px; }
+        .episode-list { max-height: 300px; overflow-y: auto; margin: 15px 0; }
         .episode-item {
             background: #f8f9fa;
             padding: 10px 15px;
@@ -146,7 +91,6 @@
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
         }
         .download-btn {
             display: inline-block;
@@ -159,20 +103,18 @@
             text-align: center;
             margin-top: 10px;
         }
-        .download-btn:hover {
-            background: #218838;
-        }
-        .error {
-            color: #dc3545;
-            background: #f8d7da;
-            padding: 10px;
+        .error { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; }
+        .backend-info {
+            background: #fff3cd;
+            padding: 15px;
             border-radius: 8px;
-            margin-top: 10px;
-            display: none;
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
         }
-        @media (max-width: 600px) {
-            .container { padding: 20px; }
-            h1 { font-size: 1.5em; }
+        .backend-info code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -212,9 +154,19 @@
         </div>
 
         <div class="error" id="errorMsg"></div>
+
+        <div class="backend-info">
+            <strong>⚠️ Info:</strong> Backend processing membutuhkan server terpisah. 
+            <br>Koneksi ke: <code id="backendUrl">https://video-splitter-api.onrender.com</code>
+        </div>
     </div>
 
     <script>
+        // === KONFIGURASI ===
+        // Ganti dengan URL backend yang sebenarnya
+        const BACKEND_URL = 'https://video-splitter-api.onrender.com';
+        // Untuk development lokal: 'http://localhost:5000'
+        
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const fileName = document.getElementById('fileName');
@@ -227,33 +179,28 @@
         const downloadBtn = document.getElementById('downloadBtn');
         const errorMsg = document.getElementById('errorMsg');
         const durasiInput = document.getElementById('durasi');
+        const backendUrlDisplay = document.getElementById('backendUrl');
+
+        // Tampilkan URL backend di UI
+        backendUrlDisplay.textContent = BACKEND_URL;
 
         let selectedFile = null;
 
         // Drag & Drop
         dropZone.addEventListener('click', () => fileInput.click());
-        
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('dragover');
         });
-        
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-        
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) {
-                handleFile(e.dataTransfer.files[0]);
-            }
+            if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
         });
 
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFile(e.target.files[0]);
-            }
+            if (e.target.files.length > 0) handleFile(e.target.files[0]);
         });
 
         function handleFile(file) {
@@ -277,12 +224,14 @@
             formData.append('durasi', durasiInput.value);
 
             try {
-                const response = await fetch('/upload', {
+                const response = await fetch(`${BACKEND_URL}/upload`, {
                     method: 'POST',
                     body: formData
                 });
 
-                // Simulasi progress (karena FFmpeg di backend)
+                if (!response.ok) throw new Error('Server error: ' + response.status);
+
+                // Simulasi progress
                 let progress = 0;
                 const interval = setInterval(() => {
                     progress += 2;
@@ -291,24 +240,18 @@
                         progressFill.textContent = progress + '%';
                         statusText.textContent = `Memotong video... ${Math.round(progress)}%`;
                     }
-                }, 200);
+                }, 300);
 
                 const data = await response.json();
                 clearInterval(interval);
 
-                if (data.error) {
-                    throw new Error(data.error);
-                }
+                if (data.error) throw new Error(data.error);
 
-                // Selesai
                 progressFill.style.width = '100%';
                 progressFill.textContent = '100%';
                 statusText.textContent = '✅ Selesai!';
                 
-                // Tampilkan hasil
-                setTimeout(() => {
-                    showResult(data);
-                }, 500);
+                setTimeout(() => showResult(data), 500);
 
             } catch (error) {
                 errorMsg.textContent = '❌ ' + error.message;
@@ -324,19 +267,19 @@
             document.getElementById('totalEpisodes').textContent = data.total_episodes;
             
             episodeList.innerHTML = '';
-            data.episodes.forEach(ep => {
-                const div = document.createElement('div');
-                div.className = 'episode-item';
-                div.innerHTML = `
-                    <span>🎬 Episode ${ep.episode}</span>
-                    <span style="color: #666; font-size: 14px;">
-                        ${ep.duration} | ${ep.size}
-                    </span>
-                `;
-                episodeList.appendChild(div);
-            });
+            if (data.episodes) {
+                data.episodes.forEach(ep => {
+                    const div = document.createElement('div');
+                    div.className = 'episode-item';
+                    div.innerHTML = `
+                        <span>🎬 Episode ${ep.episode}</span>
+                        <span style="color: #666; font-size: 14px;">${ep.duration} | ${ep.size}</span>
+                    `;
+                    episodeList.appendChild(div);
+                });
+            }
             
-            downloadBtn.href = data.download_url;
+            downloadBtn.href = `${BACKEND_URL}${data.download_url}`;
             downloadBtn.style.display = 'inline-block';
         }
     </script>
